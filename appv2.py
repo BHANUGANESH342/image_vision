@@ -1,6 +1,7 @@
 import os
 os.environ["STREAMLIT_SERVER_ENABLE_WATCHER"] = "false"  # Disable problematic watcher
 import cv2  # Ensure this import is at the top of your file
+from ultralytics import YOLO
 
 import streamlit as st
 from PIL import Image
