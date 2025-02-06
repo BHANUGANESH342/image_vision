@@ -8,11 +8,12 @@ import numpy as np
 temp = pathlib.PosixPath
 pathlib.PosixPath = pathlib.WindowsPath
 
-# Load YOLOv5 model
+# Load YOLOv5 model (replacing torch.hub with torch.load if local model file)
 @st.cache_resource
 def load_model():
-    model = torch.hub.load('ultralytics/yolov5:v7.0', 'custom', 
-                           path=r'yolov5best_aug_false.pt')
+    # Make sure to upload your yolov5best_aug_false.pt model file to Streamlit Cloud
+    model = torch.load('yolov5best_aug_false.pt')  # Load your model locally
+    model.eval()  # Set the model to evaluation mode
     return model
 
 # Function to detect objects in the image
@@ -22,7 +23,7 @@ def detect_objects(image, conf_threshold):
     results = model(image)
     return results
 
-# Streamlit app
+# Streamlit app layout and design
 st.markdown("""
     <style>
     .title {
@@ -49,27 +50,28 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Display logos in top-left and top-right corners
-logo_left_path = r"D:\AGMarks\flask_deploy\project_folder\left_logo.png"  # Update with your local path
-logo_right_path = r"D:\AGMarks\flask_deploy\project_folder\right_logo.png"  # Update with your local path
+# Upload logos through file uploader (instead of hardcoding paths)
+logo_left = st.file_uploader("Upload Left Logo", type=["png", "jpg"])
+logo_right = st.file_uploader("Upload Right Logo", type=["png", "jpg"])
 
-st.markdown(f'<div class="top-left"><img src="file:///{logo_left_path}" width="100"></div>', unsafe_allow_html=True)
-st.markdown(f'<div class="top-right"><img src="file:///{logo_right_path}" width="100"></div>', unsafe_allow_html=True)
+if logo_left and logo_right:
+    st.markdown(f'<div class="top-left"><img src="data:image/png;base64,{logo_left.getvalue().decode()}" width="100"></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="top-right"><img src="data:image/png;base64,{logo_right.getvalue().decode()}" width="100"></div>', unsafe_allow_html=True)
 
 # Title
 st.markdown('<div class="title">Crop Disease Detection</div>', unsafe_allow_html=True)
 
 # Add red color to only the "Select the crop" label
 st.markdown('<div class="red-label">Select the crop</div>', unsafe_allow_html=True)
-crop_selection = st.selectbox("", ["Paddy", "Wheat", "Maize"])
+crop_selection = st.selectbox("Select the crop", ["Paddy", "Wheat", "Maize"])
 st.write(f"Selected Crop: {crop_selection}")
 
 # Add default labels with no custom style for other widgets
 st.write("Choose an image...")
-uploaded_image = st.file_uploader("", type=["jpg", "jpeg", "png"])
+uploaded_image = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
 st.write("Set Confidence Threshold")
-conf_threshold = st.slider("", 0.0, 1.0, 0.25, 0.05)
+conf_threshold = st.slider("Set Confidence Threshold", 0.0, 1.0, 0.25, 0.05)
 
 # Define the precautions/remedies dictionary
 precautions_dict = {
@@ -93,7 +95,7 @@ if uploaded_image is not None:
     img = Image.open(uploaded_image)
     
     # Display the uploaded image
-    st.image(img, caption="Uploaded Image.", use_column_width=True)
+    st.image(img, caption="Uploaded Image.", use_container_width=True)
     
     # Convert to NumPy array (OpenCV format)
     img_cv = np.array(img)
@@ -111,7 +113,7 @@ if uploaded_image is not None:
         
         # Convert inferenced image back to PIL for streamlit display
         inferenced_img_pil = Image.fromarray(inferenced_img)
-        st.image(inferenced_img_pil, caption="Inferenced Image.", use_column_width=True)
+        st.image(inferenced_img_pil, caption="Inferenced Image.", use_container_width=True)
         
         # Extract detected class names and confidence scores
         detected_classes = results.names
