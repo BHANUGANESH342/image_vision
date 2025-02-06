@@ -15,7 +15,8 @@ def load_model():
             'ultralytics/yolov5:v7.0', 
             'custom', 
             path=model_path, 
-            force_reload=True
+            force_reload=True,
+            trust_repo=True  # Add this line
         )
         return model
     except Exception as e:
@@ -56,7 +57,7 @@ precautions_dict = {
 
 if uploaded_image:
     img = Image.open(uploaded_image).convert("RGB")
-    st.image(img, caption="Uploaded Image.", use_column_width=True)
+    st.image(img, caption="Uploaded Image.", use_container_width=True)
 
     if st.button("Run Detection"):
         results = detect_objects(img, conf_threshold)
@@ -65,7 +66,7 @@ if uploaded_image:
         else:
             st.subheader("Detection Results")
             inferenced_img = np.squeeze(results.render())
-            st.image(inferenced_img, caption="Detected Objects", use_column_width=True)
+            st.image(inferenced_img, caption="Detected Objects", use_container_width=True)
 
             # Display predictions
             preds = results.pandas().xyxy[0]
