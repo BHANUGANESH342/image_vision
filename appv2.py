@@ -1,18 +1,16 @@
 import os
-os.environ["STREAMLIT_SERVER_ENABLE_WATCHER"] = "false"  # Disable problematic watcher
-import cv2  # Ensure this import is at the top of your file
-
 import streamlit as st
 from PIL import Image
 import torch
 import numpy as np
+
+os.environ["STREAMLIT_SERVER_ENABLE_WATCHER"] = "false"  # Disable problematic watcher
 
 # Load YOLOv5 model with absolute path
 @st.cache_resource
 def load_model():
     try:
         model_path = os.path.abspath("yolov5best_aug_false.pt")
-        # Load model using a direct path instead of torch.hub
         model = torch.hub.load(
             'ultralytics/yolov5',
             'custom',
@@ -24,7 +22,6 @@ def load_model():
     except Exception as e:
         st.error(f"Model loading failed: {str(e)}")
         return None
-
 
 # Detection function
 def detect_objects(image, conf_threshold):
@@ -51,11 +48,10 @@ st.write(f"Selected Crop: {crop_selection}")
 uploaded_image = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 conf_threshold = st.slider("Set Confidence Threshold", 0.0, 1.0, 0.25, 0.05)
 
-# Precautions dictionary (fill this with your actual data)
+# Precautions dictionary
 precautions_dict = {
     "disease1": ["Precaution 1", "Precaution 2"],
     "disease2": ["Precaution A", "Precaution B"],
-    # Add your actual disease precautions here
 }
 
 if uploaded_image:
@@ -72,7 +68,6 @@ if uploaded_image:
                 inferenced_img = np.squeeze(results.render())
                 st.image(inferenced_img, caption="Detected Objects", use_container_width=True)
 
-                # Display predictions
                 preds = results.pandas().xyxy[0]
                 if not preds.empty:
                     max_conf_row = preds.loc[preds['confidence'].idxmax()]
