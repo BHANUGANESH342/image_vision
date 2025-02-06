@@ -8,7 +8,6 @@ import numpy as np
 @st.cache_resource
 def load_model():
     try:
-        # Ensure OpenCV is available
         import cv2
     except ImportError:
         st.error("OpenCV is not installed. Please check your requirements.")
