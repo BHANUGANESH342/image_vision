@@ -1,33 +1,28 @@
 import os
+os.environ["STREAMLIT_SERVER_ENABLE_WATCHER"] = "false"  # Disable problematic watcher
+import cv2  # Ensure this import is at the top of your file
+
 import streamlit as st
 from PIL import Image
 import torch
 import numpy as np
 
-# Disable problematic watcher
-os.environ["STREAMLIT_SERVER_ENABLE_WATCHER"] = "false"  
-import cv2  # Ensure this import is at the top of your file
-
 # Load YOLOv5 model with absolute path
 @st.cache_resource
-def load_model(max_retries=3):
-    for attempt in range(max_retries):
-        try:
-            model_path = os.path.abspath("yolov5best_aug_false.pt")
-            model = torch.hub.load(
-                'ultralytics/yolov5:v7.0', 
-                'custom', 
-                path=model_path, 
-                force_reload=True,
-                trust_repo=True
-            )
-            return model
-        except Exception as e:
-            if attempt < max_retries - 1:
-                st.warning(f"Attempt {attempt + 1} failed: {str(e)}. Retrying...")
-            else:
-                st.error(f"Model loading failed after {max_retries} attempts: {str(e)}")
-                return None
+def load_model():
+    model_path = "yolov5best_aug_false.pt"  # Make sure this path is correct
+    if not os.path.exists(model_path):
+        st.error("Model file not found. Please upload the model.")
+        return None
+    
+    try:
+        # Load the model directly
+        model = torch.load(model_path, map_location='cpu')  # Adjust as needed
+        model.eval()  # Set the model to evaluation mode
+        return model
+    except Exception as e:
+        st.error(f"Model loading failed: {str(e)}")
+        return None
 
 # Detection function
 def detect_objects(image, conf_threshold):
