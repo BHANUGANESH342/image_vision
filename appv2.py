@@ -1,25 +1,31 @@
-import os
 import pathlib
 import streamlit as st
 from PIL import Image
 import torch
 import numpy as np
 
-# Fixing the torch classes path issue
-try:
-    torch.classes.__path__ = [os.path.join(torch.__path__[0], torch.classes.__file__)]
-except AttributeError:
-    torch.classes.__path__ = []
-
-# Load YOLOv5 model
+# Load YOLOv5 model with error handling
 @st.cache_resource
 def load_model():
-    model = torch.hub.load('ultralytics/yolov5:v7.0', 'custom', path='yolov5best_aug_false.pt')
-    return model
+    try:
+        # Ensure OpenCV is available
+        import cv2
+    except ImportError:
+        st.error("OpenCV is not installed. Please check your requirements.")
+        return None
+
+    try:
+        model = torch.hub.load('ultralytics/yolov5:v7.0', 'custom', path='yolov5best_aug_false.pt', force_reload=True)
+        return model
+    except Exception as e:
+        st.error(f"Error loading model: {e}")
+        return None
 
 # Function to detect objects in the image
 def detect_objects(image, conf_threshold):
     model = load_model()
+    if model is None:
+        return None
     model.conf = conf_threshold  # Set confidence threshold
     results = model(image)
     return results
@@ -71,31 +77,32 @@ precautions_dict = {
 
 if uploaded_image is not None:
     img = Image.open(uploaded_image)
-    st.image(img, caption="Uploaded Image.", use_container_width=True)
+    st.image(img, caption="Uploaded Image.", use_column_width=True)
 
     img_cv = np.array(img)
 
     if st.button("Run Detection"):
         results = detect_objects(img_cv, conf_threshold)
-        st.subheader("Detection Results")
-        inferenced_img = results.render()[0]
-        inferenced_img_pil = Image.fromarray(inferenced_img)
-        st.image(inferenced_img_pil, caption="Inferenced Image.", use_container_width=True)
+        if results is not None:
+            st.subheader("Detection Results")
+            inferenced_img = results.render()[0]
+            inferenced_img_pil = Image.fromarray(inferenced_img)
+            st.image(inferenced_img_pil, caption="Inferenced Image.", use_column_width=True)
 
-        detected_classes = results.names
-        pred_boxes = results.pred[0]
+            detected_classes = results.names
+            pred_boxes = results.pred[0]
 
-        if pred_boxes.shape[0] > 0:
-            max_conf_idx = torch.argmax(pred_boxes[:, -2])
-            max_conf_class_id = int(pred_boxes[max_conf_idx, -1])
-            max_conf_score = round(pred_boxes[max_conf_idx, -2].item(), 2)
-            max_conf_class_name = detected_classes[max_conf_class_id]
+            if pred_boxes.shape[0] > 0:
+                max_conf_idx = torch.argmax(pred_boxes[:, -2])
+                max_conf_class_id = int(pred_boxes[max_conf_idx, -1])
+                max_conf_score = round(pred_boxes[max_conf_idx, -2].item(), 2)
+                max_conf_class_name = detected_classes[max_conf_class_id]
 
-            st.success(f"Highest Confidence Prediction: {max_conf_class_name} (Confidence: {max_conf_score})")
+                st.success(f"Highest Confidence Prediction: {max_conf_class_name} (Confidence: {max_conf_score})")
 
-            if max_conf_class_name in precautions_dict:
-                st.subheader("Precautions / Remedies:")
-                for precaution in precautions_dict[max_conf_class_name]:
-                    st.write(f"- {precaution}")
-            else:
-                st.write("No specific precautions available for this disease.")
+                if max_conf_class_name in precautions_dict:
+                    st.subheader("Precautions / Remedies:")
+                    for precaution in precautions_dict[max_conf_class_name]:
+                        st.write(f"- {precaution}")
+                else:
+                    st.write("No specific precautions available for this disease.")
