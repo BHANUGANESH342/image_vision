@@ -1,22 +1,17 @@
-import pathlib
 import streamlit as st
 from PIL import Image
 import torch
 import numpy as np
 from pathlib import Path
-# Fix for pathlib issue on Windows
-temp = pathlib.PosixPath
-pathlib.PosixPath = pathlib.WindowsPath
 
-
-# Use Path without worrying about platform-specific subclasses
+# Ensure you are using Path, which will automatically select the correct platform type
 script_path = Path(__file__).resolve().parent
 
 # Load YOLOv5 model (replacing torch.hub with torch.load if local model file)
 @st.cache_resource
 def load_model():
     # Make sure to upload your yolov5best_aug_false.pt model file to Streamlit Cloud
-    model = torch.load('yolov5best_aug_false.pt')  # Load your model locally
+    model = torch.load('yolov5best_aug_false.pt', map_location=torch.device('cpu'))
     model.eval()  # Set the model to evaluation mode
     return model
 
