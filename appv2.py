@@ -4,35 +4,26 @@ from PIL import Image
 import numpy as np
 from ultralytics import YOLO  # Updated import
 
-os.environ["STREAMLIT_SERVER_ENABLE_WATCHER"] = "false"  # Disable problematic watcher
+# Disable the Streamlit watcher to avoid issues
+os.environ["STREAMLIT_SERVER_ENABLE_WATCHER"] = "false"
 
+# Load YOLOv5 model with absolute path
 @st.cache_resource
 def load_model():
+    model_path = os.path.abspath("yolov5best_aug_false.pt")
     try:
-        model_path = os.path.abspath("yolov5best_aug_false.pt")
-        model = YOLO(model_path)  # Use YOLO class from ultralytics
+        model = YOLO(model_path)
         return model
     except Exception as e:
         st.error(f"Model loading failed: {str(e)}")
         return None
-
-def detect_objects(image, conf_threshold):
-    model = load_model()
-    if model is None:
-        return None
-    results = model(image, conf=conf_threshold)  # Updated detection call
-    return results
-
-# Streamlit UI code remains the same...
-
 
 # Detection function
 def detect_objects(image, conf_threshold):
     model = load_model()
     if model is None:
         return None
-    model.conf = conf_threshold
-    results = model(image)
+    results = model.predict(image, conf=conf_threshold)
     return results
 
 # Streamlit UI
@@ -51,10 +42,11 @@ st.write(f"Selected Crop: {crop_selection}")
 uploaded_image = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 conf_threshold = st.slider("Set Confidence Threshold", 0.0, 1.0, 0.25, 0.05)
 
-# Precautions dictionary
+# Precautions dictionary (fill this with your actual data)
 precautions_dict = {
     "disease1": ["Precaution 1", "Precaution 2"],
     "disease2": ["Precaution A", "Precaution B"],
+    # Add your actual disease precautions here
 }
 
 if uploaded_image:
@@ -62,8 +54,8 @@ if uploaded_image:
     st.image(img, caption="Uploaded Image.", use_container_width=True)
 
     if st.button("Run Detection"):
-        with st.spinner("Running detection..."):  # Show loading spinner
-            results = detect_objects(img, conf_threshold)
+        with st.spinner("Running detection..."):
+            results = detect_objects(np.array(img), conf_threshold)
             if results is None:
                 st.error("Detection failed. Check model logs.")
             else:
@@ -71,6 +63,7 @@ if uploaded_image:
                 inferenced_img = np.squeeze(results.render())
                 st.image(inferenced_img, caption="Detected Objects", use_container_width=True)
 
+                # Display predictions
                 preds = results.pandas().xyxy[0]
                 if not preds.empty:
                     max_conf_row = preds.loc[preds['confidence'].idxmax()]
