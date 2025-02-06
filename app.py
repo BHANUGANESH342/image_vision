@@ -147,3 +147,5 @@ if model_file is not None:
                         st.write("No specific precautions available for this disease.")
     else:
         st.error("Failed to load model.")
+
+i  wnt like this wat only
