@@ -5,5 +5,6 @@ torchaudio
 Pillow
 numpy<2.0
 rich
-opencv-python-headless  # Use the headless version to avoid GUI dependencies
-IPython  # Added to avoid ImportError
+opencv-python-headless
+IPython
+ultralytics
