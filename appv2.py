@@ -61,23 +61,26 @@ if uploaded_image:
     st.image(img, caption="Uploaded Image.", use_container_width=True)
 
     if st.button("Run Detection"):
-        results = detect_objects(img, conf_threshold)
-        if results is None:
-            st.error("Detection failed. Check model logs.")
-        else:
-            st.subheader("Detection Results")
-            inferenced_img = np.squeeze(results.render())
-            st.image(inferenced_img, caption="Detected Objects", use_container_width=True)
+        with st.spinner("Running detection..."):  # Show loading spinner
+            results = detect_objects(img, conf_threshold)
+            if results is None:
+                st.error("Detection failed. Check model logs.")
+            else:
+                st.subheader("Detection Results")
+                inferenced_img = np.squeeze(results.render())
+                st.image(inferenced_img, caption="Detected Objects", use_container_width=True)
 
-            # Display predictions
-            preds = results.pandas().xyxy[0]
-            if not preds.empty:
-                max_conf_row = preds.loc[preds['confidence'].idxmax()]
-                st.success(f"Prediction: {max_conf_row['name']} (Confidence: {max_conf_row['confidence']:.2f})")
+                # Display predictions
+                preds = results.pandas().xyxy[0]
+                if not preds.empty:
+                    max_conf_row = preds.loc[preds['confidence'].idxmax()]
+                    st.success(f"Prediction: {max_conf_row['name']} (Confidence: {max_conf_row['confidence']:.2f})")
 
-                if max_conf_row['name'] in precautions_dict:
-                    st.subheader("Precautions/Remedies:")
-                    for item in precautions_dict[max_conf_row['name']]:
-                        st.write(f"- {item}")
+                    if max_conf_row['name'] in precautions_dict:
+                        st.subheader("Precautions/Remedies:")
+                        for item in precautions_dict[max_conf_row['name']]:
+                            st.write(f"- {item}")
+                    else:
+                        st.write("No precautions available.")
                 else:
-                    st.write("No precautions available.")
+                    st.warning("No objects detected.")
