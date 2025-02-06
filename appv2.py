@@ -47,8 +47,12 @@ st.write(f"Selected Crop: {crop_selection}")
 uploaded_image = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 conf_threshold = st.slider("Set Confidence Threshold", 0.0, 1.0, 0.25, 0.05)
 
-# Precautions dictionary (same as before)
-precautions_dict = { ... }  # Keep your existing dictionary
+# Precautions dictionary (fill this with your actual data)
+precautions_dict = {
+    "disease1": ["Precaution 1", "Precaution 2"],
+    "disease2": ["Precaution A", "Precaution B"],
+    # Add your actual disease precautions here
+}
 
 if uploaded_image:
     img = Image.open(uploaded_image).convert("RGB")
