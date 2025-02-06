@@ -1,10 +1,15 @@
 streamlit
 torch==2.2.0
+torchvision
+torchaudio
 torchvision==0.15.0
 torchaudio==2.2.0
 Pillow
 numpy<2.0
 rich
+opencv-python-headless  # Use the headless version to avoid GUI dependencies
+IPython  # Added to avoid ImportError
+ultralytics  # Ensure YOLOv5 functionality
 opencv-python-headless
 IPython
 ultralytics==8.3.72
