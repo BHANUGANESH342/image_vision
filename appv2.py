@@ -1,8 +1,15 @@
+import os
 import pathlib
 import streamlit as st
 from PIL import Image
 import torch
 import numpy as np
+
+# Fixing the torch classes path issue
+try:
+    torch.classes.__path__ = [os.path.join(torch.__path__[0], torch.classes.__file__)]
+except AttributeError:
+    torch.classes.__path__ = []
 
 # Load YOLOv5 model
 @st.cache_resource
@@ -64,7 +71,7 @@ precautions_dict = {
 
 if uploaded_image is not None:
     img = Image.open(uploaded_image)
-    st.image(img, caption="Uploaded Image.", use_container_width=True)  # Updated parameter
+    st.image(img, caption="Uploaded Image.", use_container_width=True)
 
     img_cv = np.array(img)
 
@@ -73,7 +80,7 @@ if uploaded_image is not None:
         st.subheader("Detection Results")
         inferenced_img = results.render()[0]
         inferenced_img_pil = Image.fromarray(inferenced_img)
-        st.image(inferenced_img_pil, caption="Inferenced Image.", use_container_width=True)  # Updated parameter
+        st.image(inferenced_img_pil, caption="Inferenced Image.", use_container_width=True)
 
         detected_classes = results.names
         pred_boxes = results.pred[0]
