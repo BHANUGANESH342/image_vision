@@ -64,7 +64,7 @@ precautions_dict = {
 
 if uploaded_image is not None:
     img = Image.open(uploaded_image)
-    st.image(img, caption="Uploaded Image.", use_column_width=True)
+    st.image(img, caption="Uploaded Image.", use_container_width=True)  # Updated parameter
 
     img_cv = np.array(img)
 
@@ -73,7 +73,7 @@ if uploaded_image is not None:
         st.subheader("Detection Results")
         inferenced_img = results.render()[0]
         inferenced_img_pil = Image.fromarray(inferenced_img)
-        st.image(inferenced_img_pil, caption="Inferenced Image.", use_column_width=True)
+        st.image(inferenced_img_pil, caption="Inferenced Image.", use_container_width=True)  # Updated parameter
 
         detected_classes = results.names
         pred_boxes = results.pred[0]
