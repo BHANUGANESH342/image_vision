@@ -1,21 +1,14 @@
-import os
 import pathlib
 import streamlit as st
 from PIL import Image
 import torch
 import numpy as np
 
-# Load YOLOv5 model with error handling
+# Load YOLOv5 model
 @st.cache_resource
 def load_model():
     try:
-        import cv2
-    except ImportError:
-        st.error("OpenCV is not installed. Please check your requirements.")
-        return None
-
-    try:
-        model = torch.hub.load('ultralytics/yolov5:v7.0', 'custom', path='yolov5best_aug_false.pt', force_reload=True)
+        model = torch.hub.load('ultralytics/yolov5:v7.0', 'custom', path='yolov5best_aug_false.pt')
         return model
     except Exception as e:
         st.error(f"Error loading model: {e}")
@@ -25,8 +18,8 @@ def load_model():
 def detect_objects(image, conf_threshold):
     model = load_model()
     if model is None:
-        return None  # Exit if model loading failed
-    model.conf = conf_threshold  # Set confidence threshold
+        return None
+    model.conf = conf_threshold
     results = model(image)
     return results
 
@@ -52,7 +45,7 @@ st.markdown('<div class="title">Crop Disease Detection</div>', unsafe_allow_html
 
 # Add red color to the "Select the crop" label
 st.markdown('<div class="red-label">Select the crop</div>', unsafe_allow_html=True)
-crop_selection = st.selectbox("Select the crop", ["Paddy", "Wheat", "Maize"], label_visibility="hidden")
+crop_selection = st.selectbox("Select the crop", ["Paddy", "Wheat", "Maize"])
 st.write(f"Selected Crop: {crop_selection}")
 
 # Image uploader and confidence threshold
@@ -83,9 +76,7 @@ if uploaded_image is not None:
 
     if st.button("Run Detection"):
         results = detect_objects(img_cv, conf_threshold)
-        if results is None:
-            st.error("Model detection failed.")
-        else:
+        if results is not None:
             st.subheader("Detection Results")
             inferenced_img = results.render()[0]
             inferenced_img_pil = Image.fromarray(inferenced_img)
@@ -108,3 +99,5 @@ if uploaded_image is not None:
                         st.write(f"- {precaution}")
                 else:
                     st.write("No specific precautions available for this disease.")
+        else:
+            st.error("Model detection failed.")
