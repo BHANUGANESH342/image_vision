@@ -1,29 +1,38 @@
 import os
+os.environ["STREAMLIT_SERVER_ENABLE_WATCHER"] = "false"  # Disable problematic watcher
+import cv2  # Ensure this import is at the top of your file
+
 import streamlit as st
 from PIL import Image
+import torch
 import numpy as np
-from ultralytics import YOLO  # Updated import
-
-# Disable the Streamlit watcher to avoid issues
-os.environ["STREAMLIT_SERVER_ENABLE_WATCHER"] = "false"
 
 # Load YOLOv5 model with absolute path
 @st.cache_resource
 def load_model():
-    model_path = os.path.abspath("yolov5best_aug_false.pt")
     try:
-        model = YOLO(model_path)
+        model_path = os.path.abspath("yolov5best_aug_false.pt")
+        # Load model using a direct path instead of torch.hub
+        model = torch.hub.load(
+            'ultralytics/yolov5',
+            'custom',
+            path=model_path,
+            force_reload=True,
+            trust_repo=True
+        )
         return model
     except Exception as e:
         st.error(f"Model loading failed: {str(e)}")
         return None
+
 
 # Detection function
 def detect_objects(image, conf_threshold):
     model = load_model()
     if model is None:
         return None
-    results = model.predict(image, conf=conf_threshold)
+    model.conf = conf_threshold
+    results = model(image)
     return results
 
 # Streamlit UI
@@ -54,8 +63,8 @@ if uploaded_image:
     st.image(img, caption="Uploaded Image.", use_container_width=True)
 
     if st.button("Run Detection"):
-        with st.spinner("Running detection..."):
-            results = detect_objects(np.array(img), conf_threshold)
+        with st.spinner("Running detection..."):  # Show loading spinner
+            results = detect_objects(img, conf_threshold)
             if results is None:
                 st.error("Detection failed. Check model logs.")
             else:
