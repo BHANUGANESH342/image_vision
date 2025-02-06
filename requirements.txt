@@ -3,5 +3,5 @@ torch==2.2.0
 torchvision
 torchaudio
 Pillow
-numpy
+numpy<2.0
 rich
