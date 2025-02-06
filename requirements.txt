@@ -3,3 +3,4 @@ Pillow
 torch
 numpy
 opencv-python
+opencv-python-headless  # Use this to avoid GUI issues on servers
