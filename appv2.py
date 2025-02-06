@@ -1,27 +1,30 @@
 import os
 import streamlit as st
 from PIL import Image
-import torch
 import numpy as np
+from ultralytics import YOLO  # Updated import
 
 os.environ["STREAMLIT_SERVER_ENABLE_WATCHER"] = "false"  # Disable problematic watcher
 
-# Load YOLOv5 model with absolute path
 @st.cache_resource
 def load_model():
     try:
         model_path = os.path.abspath("yolov5best_aug_false.pt")
-        model = torch.hub.load(
-            'ultralytics/yolov5',
-            'custom',
-            path=model_path,
-            force_reload=True,
-            trust_repo=True
-        )
+        model = YOLO(model_path)  # Use YOLO class from ultralytics
         return model
     except Exception as e:
         st.error(f"Model loading failed: {str(e)}")
         return None
+
+def detect_objects(image, conf_threshold):
+    model = load_model()
+    if model is None:
+        return None
+    results = model(image, conf=conf_threshold)  # Updated detection call
+    return results
+
+# Streamlit UI code remains the same...
+
 
 # Detection function
 def detect_objects(image, conf_threshold):
