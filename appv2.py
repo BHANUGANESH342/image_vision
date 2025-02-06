@@ -10,19 +10,21 @@ import numpy as np
 # Load YOLOv5 model with absolute path
 @st.cache_resource
 def load_model():
-    model_path = "yolov5best_aug_false.pt"  # Make sure this path is correct
-    if not os.path.exists(model_path):
-        st.error("Model file not found. Please upload the model.")
-        return None
-    
     try:
-        # Load the model directly
-        model = torch.load(model_path, map_location='cpu')  # Adjust as needed
-        model.eval()  # Set the model to evaluation mode
+        model_path = os.path.abspath("yolov5best_aug_false.pt")
+        # Load model using a direct path instead of torch.hub
+        model = torch.hub.load(
+            'ultralytics/yolov5',
+            'custom',
+            path=model_path,
+            force_reload=True,
+            trust_repo=True
+        )
         return model
     except Exception as e:
         st.error(f"Model loading failed: {str(e)}")
         return None
+
 
 # Detection function
 def detect_objects(image, conf_threshold):
