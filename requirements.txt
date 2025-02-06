@@ -5,3 +5,4 @@ torchaudio
 Pillow
 numpy<2.0
 rich
+opencv-python
