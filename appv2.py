@@ -1,3 +1,4 @@
+import os
 import pathlib
 import streamlit as st
 from PIL import Image
@@ -24,7 +25,7 @@ def load_model():
 def detect_objects(image, conf_threshold):
     model = load_model()
     if model is None:
-        return None
+        return None  # Exit if model loading failed
     model.conf = conf_threshold  # Set confidence threshold
     results = model(image)
     return results
@@ -51,7 +52,7 @@ st.markdown('<div class="title">Crop Disease Detection</div>', unsafe_allow_html
 
 # Add red color to the "Select the crop" label
 st.markdown('<div class="red-label">Select the crop</div>', unsafe_allow_html=True)
-crop_selection = st.selectbox("", ["Paddy", "Wheat", "Maize"])
+crop_selection = st.selectbox("Select the crop", ["Paddy", "Wheat", "Maize"], label_visibility="hidden")
 st.write(f"Selected Crop: {crop_selection}")
 
 # Image uploader and confidence threshold
@@ -82,7 +83,9 @@ if uploaded_image is not None:
 
     if st.button("Run Detection"):
         results = detect_objects(img_cv, conf_threshold)
-        if results is not None:
+        if results is None:
+            st.error("Model detection failed.")
+        else:
             st.subheader("Detection Results")
             inferenced_img = results.render()[0]
             inferenced_img_pil = Image.fromarray(inferenced_img)
