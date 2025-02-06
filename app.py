@@ -54,8 +54,8 @@ logo_left = st.file_uploader("Upload Left Logo", type=["png", "jpg"])
 logo_right = st.file_uploader("Upload Right Logo", type=["png", "jpg"])
 
 if logo_left and logo_right:
-    st.markdown(f'<div class="top-left"><img src="data:image/png;base64,{logo_left.getvalue().decode()}" width="100"></div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="top-right"><img src="data:image/png;base64,{logo_right.getvalue().decode()}" width="100"></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="top-left"><img src="right_logo.png.png;base64,{logo_left.getvalue().decode()}" width="100"></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="top-right"><img src="right_logo.png.png;base64,{logo_right.getvalue().decode()}" width="100"></div>', unsafe_allow_html=True)
 
 # Title
 st.markdown('<div class="title">Crop Disease Detection</div>', unsafe_allow_html=True)
@@ -94,7 +94,7 @@ if uploaded_image is not None:
     img = Image.open(uploaded_image)
     
     # Display the uploaded image
-    st.image(img, caption="Uploaded Image.", use_container_width=True)
+    st.image(img, caption="Uploaded Image.")  # Removed `use_container_width=True`
     
     # Convert to NumPy array (OpenCV format)
     img_cv = np.array(img)
@@ -112,7 +112,7 @@ if uploaded_image is not None:
         
         # Convert inferenced image back to PIL for streamlit display
         inferenced_img_pil = Image.fromarray(inferenced_img)
-        st.image(inferenced_img_pil, caption="Inferenced Image.", use_container_width=True)
+        st.image(inferenced_img_pil, caption="Inferenced Image.")  # Removed `use_container_width=True`
         
         # Extract detected class names and confidence scores
         detected_classes = results.names
