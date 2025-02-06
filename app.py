@@ -148,4 +148,4 @@ if model_file is not None:
     else:
         st.error("Failed to load model.")
 
-i  wnt like this wat only
+
