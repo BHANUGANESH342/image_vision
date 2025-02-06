@@ -5,6 +5,7 @@ torchaudio
 Pillow
 numpy<2.0
 rich
-opencv-python-headless==4.6.0.66  # Specify a version
+opencv-python-headless==4.6.0.66
 IPython
 ultralytics
+setuptools  # Add this line
