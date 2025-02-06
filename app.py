@@ -9,9 +9,9 @@ script_path = Path(__file__).resolve().parent
 
 # Function to load the YOLOv5 model (handles file upload and model loading)
 @st.cache_resource
-def load_model(model_file):
+def load_model(model_file_path):
     try:
-        model = torch.load(model_file, map_location=torch.device('cpu'))
+        model = torch.load(model_file_path, map_location=torch.device('cpu'))
         model.eval()  # Set the model to evaluation mode
         return model
     except Exception as e:
@@ -91,11 +91,12 @@ precautions_dict = {
     # Add more diseases and their precautions here...
 }
 
-# Upload model file via Streamlit
-model_file = st.file_uploader("Upload YOLOv5 Model", type=["pt"])
+# Path to the model in the GitHub repository (replace with your actual path)
+model_file_path = script_path / 'yolov5best_aug_false.pt'  # Adjust the model path
 
-if model_file is not None:
-    model = load_model(model_file)
+# Load the model directly from GitHub or local repository
+if model_file_path.exists():
+    model = load_model(model_file_path)
     if model is not None:
         st.success("Model loaded successfully!")
 
@@ -147,5 +148,5 @@ if model_file is not None:
                         st.write("No specific precautions available for this disease.")
     else:
         st.error("Failed to load model.")
-
-
+else:
+    st.error(f"Model file not found at {model_file_path}. Make sure the model is in the correct folder.")
