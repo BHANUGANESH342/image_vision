@@ -12,7 +12,7 @@ import numpy as np
 @st.cache_resource
 def load_model():
     try:
-        model_path = os.path.abspath("agmarks_final.pt")
+        model_path = os.path.abspath("yolov5best_aug_false.pt")
         # Load model using a direct path instead of torch.hub
         model = torch.hub.load(
             'ultralytics/yolov5',
